@@ -90,6 +90,8 @@ public class ChooseAreaActivity extends Activity {
                 }else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }else if(currentLevel ==LEVEL_COUNTY){
+
                 }
             }
         });
