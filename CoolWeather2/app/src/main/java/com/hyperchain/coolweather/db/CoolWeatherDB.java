@@ -23,7 +23,7 @@ public class CoolWeatherDB {
     /*
     数据库版本
      */
-    public static final int VERSION = 1;
+    public static final int VERSION = 3;
     private static CoolWeatherDB coolWeatherDB;
     private SQLiteDatabase db;
 
@@ -53,7 +53,7 @@ public class CoolWeatherDB {
             ContentValues values = new ContentValues();
             values.put("province_name", province.getProvinceName());
             values.put("province_code", province.getProvinceCode());
-            db.insert("Provice", null, values);
+            db.insert("Province", null, values);
         }
     }
 
@@ -82,6 +82,7 @@ public class CoolWeatherDB {
             ContentValues values = new ContentValues();
             values.put("city_name", city.getCityName());
             values.put("city_code", city.getCityCode());
+            values.put("province_id",city.getProvinceId());
             db.insert("City", null, values);
         }
     }

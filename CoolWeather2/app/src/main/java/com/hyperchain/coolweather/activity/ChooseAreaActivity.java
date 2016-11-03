@@ -72,6 +72,15 @@ public class ChooseAreaActivity extends Activity {
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
         coolWeatherDB = CoolWeatherDB.getInstance(this);
+        /*
+        测试部分
+         */
+//        selectedProvince = new Province();
+//        selectedProvince.setId(11);
+//        selectedProvince.setProvinceName("山东");
+//        selectedProvince.setProvinceCode("12");
+//        queryCities();
+        queryProvinces();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -84,8 +93,6 @@ public class ChooseAreaActivity extends Activity {
                 }
             }
         });
-        queryProvinces();
-
     }
     /*
     查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器上查询。
