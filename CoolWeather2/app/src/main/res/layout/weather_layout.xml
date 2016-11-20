@@ -37,6 +37,12 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#27A5F9" >
+        <Button
+            android:id="@+id/click_btn"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Click"
+            />
         <TextView
             android:id="@+id/publish_text"
             android:layout_width="wrap_content"

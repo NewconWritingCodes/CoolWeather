@@ -1,8 +1,12 @@
 package com.hyperchain.coolweather.activity;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -10,8 +14,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hyperchain.coolweather.R;
+import com.hyperchain.coolweather.util.GsonRetrofit;
 import com.hyperchain.coolweather.util.HttpCallbackListener;
 import com.hyperchain.coolweather.util.HttpUtil;
+import com.hyperchain.coolweather.util.Utility;
 
 /**
  * Created by Newcon on 2016/11/3.
@@ -50,6 +56,10 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
      * 更新天气按钮
      */
     private Button refreshWeather;
+    /*
+    测试Retrofit按钮
+     */
+    private Button checkButton;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,21 +76,67 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         switchCity = (Button) findViewById(R.id.switch_city);
         refreshWeather = (Button) findViewById(R.id.refresh_weather);
         String countyCode = getIntent().getStringExtra("county_code");
+        Log.i("tag","countyCode:"+countyCode);
         if (!TextUtils.isEmpty(countyCode)) {
+            //有县级代号时就去查询天气
             publishText.setText("同步中...");
             weatherInfoLayout.setVisibility(View.INVISIBLE);
-            cityNameText.setVisibility(View.VISIBLE);
+            cityNameText.setVisibility(View.INVISIBLE);
+            queryWeatherCode(countyCode);
 
+        }else{
+            //没有县级代号时就直接显示本地天气
+            showWeather();
         }
+        switchCity.setOnClickListener(this);
+        refreshWeather.setOnClickListener(this);
+    }
+    /**
+     * 查询县级代号所对应的天气代号。
+     */
+    private void queryWeatherCode(String countyCode) {
+        String address = "http://www.weather.com.cn/data/list3/city" +
+                countyCode + ".xml";
+        queryFromServer(address, "countyCode");
     }
 
     public void onClick(View v) {
+        switch(v.getId()){
+            case R.id.switch_city:
+                Intent intent = new Intent(this,ChooseAreaActivity.class);
+                intent.putExtra("from_weather_activity",true);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.refresh_weather:
+                publishText.setText("同步中...");
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                String weatherCode = prefs.getString("weather_code","");
+                if(!TextUtils.isEmpty(weatherCode)){
+                    queryWeatherCode(weatherCode);
+                }
+                break;
+            case R.id.click_btn:
+                GsonRetrofit gsonRetrofit =new GsonRetrofit("101010100");
+                gsonRetrofit.getWeatherInfo();
+            default:
+                break;
+        }
 
     }
+
     /*
     查询天气代号所对应的天气
      */
-    private void queryWeatherInfo(S)
+    private void queryWeatherInfo(String weatherCode) {
+        String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
+//        queryFromServer(address, "weatherCode");
+//        Log.d("tag","weatherCodeAddress:"+address);
+        //使用retrofit
+        Log.d("tag",address);
+        queryFromServer(address,"weatherCode");
+
+    }
 
 
     /*
@@ -90,21 +146,58 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
-                if("countyCode".equals(type)){
+                if ("countyCode".equals(type)) {
                     //从服务器返回数据中解析出天气代号
                     String[] array = response.split("\\|");
-                    if(array !=null&&array.length==2){
-                        String weatherCode =array[1];
-
+                    if (array != null && array.length == 2) {
+                        String weatherCode = array[1];
+                        Log.i("tag","weatherCode:"+weatherCode);
+                        queryWeatherInfo(weatherCode);
                     }
 
+                } else if ("weatherCode".equals(type)) {
+                    Log.i("tag",response);
+                    Utility.handleWeatherResponse(WeatherActivity.this, response);
+                    Log.i("tag","weatherInfo"+response.toString());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showWeather();
+                        }
+                    });
+//                    GsonRetrofit gsonRetrofit =new GsonRetrofit(address);
+//                    gsonRetrofit.getWeatherInfo();
                 }
             }
 
             @Override
             public void onError(Exception e) {
+                e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            publishText.setText("同步失败");
 
+                        }
+                    });
             }
         });
     }
+
+    /**
+     * 从SharedPreferences文件中读取存储的天气信息，并显示到界面上。
+     */
+    private void showWeather() {
+        SharedPreferences prefs = PreferenceManager.
+                getDefaultSharedPreferences(this);
+        cityNameText.setText(prefs.getString("city_name", ""));
+        temp1Text.setText(prefs.getString("temp1", ""));
+        temp2Text.setText(prefs.getString("temp2", ""));
+        weatherDespText.setText(prefs.getString("weather_desp", ""));
+        publishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
+        currentDateText.setText(prefs.getString("current_date", ""));
+        weatherInfoLayout.setVisibility(View.VISIBLE);
+        cityNameText.setVisibility(View.VISIBLE);
+    }
 }
+

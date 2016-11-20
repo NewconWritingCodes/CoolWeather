@@ -1,15 +1,38 @@
 package com.example;
 
+
+class MyThread extends Thread{
+    public void run(){
+        System.out.println("blah");
+    }
+}
+
+class MyThread2 implements Runnable{
+    public void run(){
+        System.out.println("blah");
+    }
+}
 public class MyClass {
-    public static void main(String[] args){
-//        String a ="01 and 杭州 or 宁波";
-//        String[] divide = a.split("and |or ");
-//        System.out.println(divide[0]);
-//        System.out.println(divide[1]);
-//        System.out.println(divide[2]);
-        System.out.println(""+"".equals(""));
-        String s=null;
-//        System.out.println(""+s.equals(""));
+    public static void main(String[] args) {
+//        new MyThread().start();
+//
+//        MyThread2 myThread2 = new MyThread2();
+//        new Thread(myThread2).start();
+
+        new Thread()
+        {
+            public void run() {
+                System.out.println("blah");
+            }
+        }.start();
+
+//        new Thread(new Runnable(){
+//            public void run(){
+//                System.out.println("blah");
+//            }
+//        }).start();
+
+
 
     }
 }
